@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Bristol';
+  src: url('/fonts/Bristol.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-terracotta: #FFD230;
+  --color-terracotta-light: #FFE066;
+  --color-terracotta-dark: #E6BC2A;
+  --color-cream: #FFF8F0;
+  --color-cream-dark: #FFF0E0;
+  --color-charcoal: #2D2D2D;
+  --color-input-bg: #FFF9E6;
+  --color-muted: #888888;
+  --color-status-green: #4CAF50;
+  --color-status-amber: #FF9800;
+  --color-status-red: #F44336;
+  --font-sans: 'Inria Serif', Georgia, serif;
+  --font-heading: 'Bristol', Georgia, serif;
+}
+
+.font-heading {
+  text-transform: uppercase;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-charcoal);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
