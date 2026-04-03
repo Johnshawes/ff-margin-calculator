@@ -59,10 +59,9 @@ export default function App() {
         body: JSON.stringify(payload),
       });
       const { calc_id } = await resp.json();
-      window.open(`${BOOKING_URL}?calc_id=${calc_id}`, '_blank', 'noopener,noreferrer');
+      window.location.href = `${BOOKING_URL}?calc_id=${calc_id}`;
     } catch {
-      // If save fails, still send them to the funnel
-      window.open(BOOKING_URL, '_blank', 'noopener,noreferrer');
+      window.location.href = BOOKING_URL;
     } finally {
       setSaving(false);
     }
