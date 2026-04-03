@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import type { CalculatorInputs } from './types';
 import { calculate } from './calculations';
-import { getDiagnostics } from './diagnostics';
+import { getDiagnostics, gpTrafficLight, labourTrafficLight, primeCostTrafficLight, overheadsTrafficLight, netProfitTrafficLight, getVerdict } from './diagnostics';
 import InputSection from './components/InputSection';
 import InputField from './components/InputField';
 import ResultsSection from './components/ResultsSection';
 import DiagnosticsSection from './components/DiagnosticsSection';
 
 const BOOKING_URL = 'https://flavourfounders.com/2---vsl-page-page-8829';
+const AUDIT_API_URL = import.meta.env.VITE_AUDIT_API_URL || 'https://ff-audit-generator-production.up.railway.app';
 
 const initialInputs: CalculatorInputs = {
   counterSales: 0,
@@ -31,11 +32,41 @@ const initialInputs: CalculatorInputs = {
 export default function App() {
   const [inputs, setInputs] = useState<CalculatorInputs>(initialInputs);
 
+  const [saving, setSaving] = useState(false);
+
   const update = (field: keyof CalculatorInputs) => (value: number) =>
     setInputs((prev) => ({ ...prev, [field]: value }));
 
   const results = useMemo(() => calculate(inputs), [inputs]);
   const diagnostics = useMemo(() => getDiagnostics(results), [results]);
+
+  const handleCTA = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        ...inputs,
+        ...results,
+        gpRating: gpTrafficLight(results.grossProfitPct),
+        labourRating: labourTrafficLight(results.labourPct),
+        primeCostRating: primeCostTrafficLight(results.primeCostPct),
+        overheadsRating: overheadsTrafficLight(results.netProfitPct < 0.05 ? 0.16 : 0.09),
+        netProfitRating: netProfitTrafficLight(results.netProfitPct),
+        verdict: getVerdict(results),
+      };
+      const resp = await fetch(`${AUDIT_API_URL}/api/calculator-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const { calc_id } = await resp.json();
+      window.open(`${BOOKING_URL}?calc_id=${calc_id}`, '_blank', 'noopener,noreferrer');
+    } catch {
+      // If save fails, still send them to the funnel
+      window.open(BOOKING_URL, '_blank', 'noopener,noreferrer');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-cream">
@@ -99,14 +130,13 @@ export default function App() {
             <p className="text-charcoal/70 text-sm mb-4">
               Book a free discovery call and we'll show you exactly how to fix your margins.
             </p>
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-charcoal text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-charcoal/80 transition-colors"
+            <button
+              onClick={handleCTA}
+              disabled={saving}
+              className="inline-block bg-charcoal text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-charcoal/80 transition-colors disabled:opacity-50"
             >
-              Book Your Free Call
-            </a>
+              {saving ? 'Loading...' : 'Find Out More'}
+            </button>
           </div>
         )}
 
